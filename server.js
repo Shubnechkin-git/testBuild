@@ -16,7 +16,7 @@ app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)
 
 var cors = require('cors')
 const corsOptions = {
-  origin: 'http://localhost:5000', // Укажите ваш домен React-приложения
+  origin: 'https://testbuild-27ld.onrender.com/', // Укажите ваш домен React-приложения
   optionsSuccessStatus: 200, // некоторые старые браузеры (IE11, старый Android) не отправляют 204
 };
 

@@ -1,5 +1,6 @@
 {
   "homepage": "./my-shop/build/index.html",
+  "proxy": "https://testbuild-27ld.onrender.com/",
   "dependencies": {
     "@emotion/css": "^11.11.2",
     "bcryptjs-react": "^2.4.6",
