@@ -1,16 +1,15 @@
-const path = require('path');
 const mysql = require('mysql');
 
-const getAnyRoute = (app) => {
+const getAnyRoute = (app, root) => {
     // if (process.env.NODE_ENV === 'production') {
-        // app.get("/*", function (req, res) {
-        //     // res.sendFile(path.join(__dirname + './../my-shop', 'build', 'index.html'));
-        //     res.sendFile(path.join(__dirname));
-        //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
-        // });
-        app.get('*', (req, res) => {
-            res.sendFile(path.join(__dirname, '/build', 'index.html'));
-        });
+    // app.get("/*", function (req, res) {
+    //     // res.sendFile(path.join(__dirname + './../my-shop', 'build', 'index.html'));
+    //     res.sendFile(path.join(__dirname));
+    //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
+    // });
+    app.get("*", (req, res) => {
+        res.sendFile("index.html", { root });
+    });
     // }
 }
 
@@ -49,7 +48,7 @@ const checkUser = (app) => {
 
 const getUserInfo = (app) => {
     // Эндпоинт для получения информации о пользователе
-    app.get('/user', (req, res) => {
+    app.post('/user', (req, res) => {
         const sessionId = req.cookies.sessionId;
 
         if (sessionId) {

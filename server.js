@@ -16,14 +16,16 @@ app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)
 
 var cors = require('cors')
 const corsOptions = {
-  origin: 'http://localhost:3000', // Укажите ваш домен React-приложения
+  origin: 'http://localhost:5000', // Укажите ваш домен React-приложения
   optionsSuccessStatus: 200, // некоторые старые браузеры (IE11, старый Android) не отправляют 204
 };
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../my-shop/build')));
+
+const root = path.join(__dirname, "./build");
+app.use(express.static(root));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -63,7 +65,7 @@ checkUser(app);//проверяет есть ли пользователь в б
 
 checkSession(app);//проверяет сессию
 
-getAnyRoute(app);//ответ на /*
+getAnyRoute(app, root);//ответ на /*
 
 logutUser(app);//реагирует на конпку выход из профиля по пути /logout
 
