@@ -44,6 +44,7 @@ app.use((req, res, next) => {
 
 })
 
+
 app.options('/register', cors());
 app.options('/catalog', cors());
 

@@ -2,10 +2,11 @@ const mysql = require('mysql');
 
 const getData = (tag, callback) => {
     const connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: 'root',
-        database: 'gena_booker'
+        host: 'sql10.freemysqlhosting.net',
+        user: 'sql10679533',
+        password: 'TxZCTlZdK6',
+        database: 'sql10679533',
+        port: 3306
     });
 
     connection.connect((err) => {
@@ -48,10 +49,11 @@ const getData = (tag, callback) => {
 
 const getUser = (sessionId) => {
     const connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: 'root',
-        database: 'gena_booker'
+        host: 'sql10.freemysqlhosting.net',
+        user: 'sql10679533',
+        password: 'TxZCTlZdK6',
+        database: 'sql10679533',
+        port: 3306
     });
 
     connection.query(`SELECT username FROM users WHERE session = ${sessionId}`, (error, results) => {

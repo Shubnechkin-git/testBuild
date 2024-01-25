@@ -26,10 +26,11 @@ const getCatalogItem = (app) => {
     app.get('/catalog', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         const connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'gena_booker'
+            host: 'sql10.freemysqlhosting.net',
+            user: 'sql10679533',
+            password: 'TxZCTlZdK6',
+            database: 'sql10679533',
+            port: 3306
         });
         connection.connect((err) => {
             if (err) {

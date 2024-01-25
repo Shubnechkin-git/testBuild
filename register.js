@@ -4,10 +4,11 @@ const uuid = require('uuid');
 const register = (app) => {
     app.post('/register', (req, res) => {
         const connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'gena_booker'
+            host: 'sql10.freemysqlhosting.net',
+            user: 'sql10679533',
+            password: 'TxZCTlZdK6',
+            database: 'sql10679533',
+            port: 3306
         });
         console.log(req.body);
         const { username, mail, password, number } = req.body;
