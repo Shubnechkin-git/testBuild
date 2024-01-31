@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 const login = require('./login');
 const register = require('./register');
 const { getHotItems, getNoveltyItems, getDiscountItems, getProduct } = require('./items');
-const { getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser } = require('./routes');
+const { getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart } = require('./routes');
 const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
@@ -23,9 +23,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
-
-const root = path.join(__dirname, "./build");
-app.use(express.static(root));
+app.use(express.static(path.join(__dirname, '../build')));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -43,7 +41,6 @@ app.use((req, res, next) => {
   next();
 
 })
-
 
 app.options('/register', cors());
 app.options('/catalog', cors());
@@ -66,11 +63,13 @@ checkUser(app);//проверяет есть ли пользователь в б
 
 checkSession(app);//проверяет сессию
 
-getAnyRoute(app, root);//ответ на /*
+getAnyRoute(app);//ответ на /*
 
 logutUser(app);//реагирует на конпку выход из профиля по пути /logout
 
 getUserInfo(app);//ответ на user
+
+addToCart(app);//добавление товара в корзину /cart
 
 getExpressBackendRoute(app);//ответ на express_backend
 

@@ -34,7 +34,7 @@ const getDiscountItems = (app) => {
 }
 
 const getProduct = (app) => {
-    app.post('/product', (req, res) => {
+    app.get('/product', (req, res) => {
         res.send(req);
     });
 }
