@@ -24,10 +24,10 @@ const getExpressBackendRoute = (app) => {
 const checkUser = (app) => {
     app.post('/checkUser', (req, res) => {
         const connection = mysql.createConnection({
-            host: 'sql10.freemysqlhosting.net',
-            user: 'sql10679533',
-            password: 'TxZCTlZdK6',
-            database: 'sql10679533',
+            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+            user: 'ukpquiunilgd9a3d',
+            password: 'sKRLt00lD4FffUASauii',
+            database: 'bds8x3eqjt659zexhm6k',
             port: 3306
         });
 
@@ -56,10 +56,10 @@ const getUserInfo = (app) => {
         if (sessionId) {
             // Подключение к базе данных (замените значения на свои)
             const connection = mysql.createConnection({
-                host: 'sql10.freemysqlhosting.net',
-                user: 'sql10679533',
-                password: 'TxZCTlZdK6',
-                database: 'sql10679533',
+                host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+                user: 'ukpquiunilgd9a3d',
+                password: 'sKRLt00lD4FffUASauii',
+                database: 'bds8x3eqjt659zexhm6k',
                 port: 3306
             });
 
@@ -95,10 +95,10 @@ const checkSession = (app) => {
         if (sessionId) {
             // Здесь вы должны выполнить запрос к базе данных для проверки существования сессии
             const connection = mysql.createConnection({
-                host: 'sql10.freemysqlhosting.net',
-                user: 'sql10679533',
-                password: 'TxZCTlZdK6',
-                database: 'sql10679533',
+                host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+                user: 'ukpquiunilgd9a3d',
+                password: 'sKRLt00lD4FffUASauii',
+                database: 'bds8x3eqjt659zexhm6k',
                 port: 3306
             });
 
@@ -131,10 +131,10 @@ const getProduct = (product_id, category) => {
         }
 
         const connection = mysql.createConnection({
-            host: 'sql10.freemysqlhosting.net',
-            user: 'sql10679533',
-            password: 'TxZCTlZdK6',
-            database: 'sql10679533',
+            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+            user: 'ukpquiunilgd9a3d',
+            password: 'sKRLt00lD4FffUASauii',
+            database: 'bds8x3eqjt659zexhm6k',
             port: 3306
         });
 

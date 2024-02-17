@@ -2,10 +2,10 @@ const mysql = require('mysql');
 
 const getData = (tag, callback) => {
     const connection = mysql.createConnection({
-        host: 'sql10.freemysqlhosting.net',
-        user: 'sql10679533',
-        password: 'TxZCTlZdK6',
-        database: 'sql10679533',
+        host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+        user: 'ukpquiunilgd9a3d',
+        password: 'sKRLt00lD4FffUASauii',
+        database: 'bds8x3eqjt659zexhm6k',
         port: 3306
     });
 
@@ -49,10 +49,10 @@ const getData = (tag, callback) => {
 
 const getUser = (sessionId) => {
     const connection = mysql.createConnection({
-        host: 'sql10.freemysqlhosting.net',
-        user: 'sql10679533',
-        password: 'TxZCTlZdK6',
-        database: 'sql10679533',
+        host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+        user: 'ukpquiunilgd9a3d',
+        password: 'sKRLt00lD4FffUASauii',
+        database: 'bds8x3eqjt659zexhm6k',
         port: 3306
     });
 
