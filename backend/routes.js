@@ -1,19 +1,6 @@
 const path = require('path');
 const mysql = require('mysql');
 
-const getAnyRoute = (app) => {
-    if (process.env.NODE_ENV === 'production') {
-        // app.get("/*", function (req, res) {
-        //     // res.sendFile(path.join(__dirname + './../my-shop', 'build', 'index.html'));
-        //     res.sendFile(path.join(__dirname));
-        //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
-        // });
-        app.get('*', (req, res) => {
-            res.sendFile(path.join(__dirname, '../my-shop/build', 'index.html'));
-        });
-    }
-}
-
 const getExpressBackendRoute = (app) => {
     app.get('/express_backend', (req, res) => {
         res.send({ express: "Подключено" });
@@ -203,7 +190,6 @@ const logutUser = (app) => {
 }
 
 module.exports = {
-    getAnyRoute,
     getExpressBackendRoute,
     checkUser,
     getUserInfo,

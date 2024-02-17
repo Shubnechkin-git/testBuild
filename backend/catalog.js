@@ -24,7 +24,6 @@ const getCatalogItem = (app) => {
     // },
     // ]
     app.get('/catalog', (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
         const connection = mysql.createConnection({
             host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
             user: 'ukpquiunilgd9a3d',
@@ -32,23 +31,27 @@ const getCatalogItem = (app) => {
             database: 'bds8x3eqjt659zexhm6k',
             port: 3306
         });
+
         connection.connect((err) => {
             if (err) {
-                return err;
+                console.error('Ошибка при соединении с базой данных:', err);
+                res.status(500).json({ error: 'Ошибка при соединении с базой данных' });
+                return;
             }
-            else {
-                connection.query('SELECT * from products', (error, results) => {
-                    if (error) {
-                        connection.end();
-                        return callback(error, null);
-                    }
-                    connection.end();
-                    res.send(JSON.stringify(results));
-                });
-            }
-        });
 
-    })
+            connection.query('SELECT * FROM products', (error, results) => {
+                if (error) {
+                    console.error('Ошибка при выполнении запроса к базе данных:', error);
+                    res.status(500).json({ error: 'Ошибка при выполнении запроса к базе данных' });
+                    return;
+                }
+
+                connection.end();
+                res.status(200).json(results);
+            });
+        });
+    });
+
 }
 
 module.exports = {
