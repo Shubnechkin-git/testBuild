@@ -136,6 +136,9 @@ const getProduct = (productId, categoryName, tableName) => {
                 case "Скидки":
                     productInfo.table_name = "discounts";
                     break;
+                case "Каталог":
+                    productInfo.table_name = "products";
+                    break;
                 default:
                     reject('Неверная категория товара');
                     return;
