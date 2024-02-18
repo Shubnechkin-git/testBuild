@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 })
 
 app.options('/register', cors());
-app.options('/catalog', cors());
+// app.options('/catalog', cors());
 
 const connection = mysql.createConnection({
   host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
