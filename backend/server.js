@@ -2,6 +2,7 @@ const express = require('express'); //Строка 1
 const app = express(); //Строка 2
 const port = process.env.PORT || 5000; //Строка 3
 const path = require('path');
+const mysql = require('mysql');
 
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
@@ -9,10 +10,16 @@ const bodyParser = require('body-parser');
 const login = require('./login');
 const register = require('./register');
 const { getHotItems, getNoveltyItems, getDiscountItems, getProduct } = require('./items');
-const { getUserCart, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart } = require('./routes');
+const { deleteFromCart, getUserCart, getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart } = require('./routes');
 const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
+
+// var cors = require('cors')
+// const corsOptions = {
+//   origin: 'http://localhost:3000', // Укажите ваш домен React-приложения
+//   optionsSuccessStatus: 200, // некоторые старые браузеры (IE11, старый Android) не отправляют 204
+// };
 
 var cors = require('cors')
 const corsOptions = {
@@ -23,7 +30,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../build')));
+app.use(express.static(path.join(__dirname, '../build/')));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -42,38 +49,51 @@ app.use((req, res, next) => {
 
 })
 
-
-
 app.options('/register', cors());
 app.options('/catalog', cors());
 
-register(app);
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'root',
+  database: 'gena_booker'
+});
 
-login(app);
+register(app, connection);
 
-getHotItems(app);
+login(app, connection);
 
-getNoveltyItems(app);
+getHotItems(app, connection);
 
-getDiscountItems(app);
+getNoveltyItems(app, connection);
 
-getProduct(app); //возращает 
+getDiscountItems(app, connection);
 
-getCatalogItem(app); //возращает товары в каталог
+getProduct(app, connection); //возращает  
 
-checkUser(app);//проверяет есть ли пользователь в бд
+getCatalogItem(app, connection); //возращает товары в каталог
 
-checkSession(app);//проверяет сессию
+checkUser(app, connection);//проверяет есть ли пользователь в бд 
 
-logutUser(app);//реагирует на конпку выход из профиля по пути /logout
+checkSession(app, connection);//проверяет сессию 
 
-getUserInfo(app);//ответ на user
+getAnyRoute(app, connection);//ответ на /*  
 
-addToCart(app);//добавление товара в корзину /cart 
+logutUser(app, connection);//реагирует на конпку выход из профиля по пути /logout
 
-getUserCart(app); //ответ на /getCart - вывод товаров в корзину
+getUserInfo(app, connection);//ответ на user 
 
-getExpressBackendRoute(app);//ответ на express_backend
+addToCart(app, connection);//добавление товара в корзину /cart  
+
+getUserCart(app, connection); //ответ на /getCart - вывод товаров в корзину 
+
+getExpressBackendRoute(app, connection);//ответ на express_backend  
+
+deleteFromCart(app, connection);//удаляет овар из коризины 
+
+// app.use((req, res) => {
+//   res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
+// }); 
 
 app.use((req, res) => {
   if (req.url != '/' && req.url != '/catalog' && req.url != '/profile' && req.url != '/about' && req.url != '/cart') {
@@ -83,4 +103,3 @@ app.use((req, res) => {
   else
     res.status(404).sendFile(path.join(__dirname, '../build', 'index.html'));
 });
-

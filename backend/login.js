@@ -4,11 +4,10 @@ const uuid = require('uuid');
 const login = (app) => {
     app.post('/login', (req, res) => {
         const connection = mysql.createConnection({
-            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-            user: 'ukpquiunilgd9a3d',
-            password: 'sKRLt00lD4FffUASauii',
-            database: 'bds8x3eqjt659zexhm6k',
-            port: 3306
+            host: 'localhost',
+            user: 'root',
+            password: 'root',
+            database: 'gena_booker'
         });
 
         const { username, password } = req.body;
@@ -39,7 +38,7 @@ const login = (app) => {
                     }
 
                     // Закрываем соединение после завершения всех запросов
-                    connection.end();
+                    
                 });
             }
         });

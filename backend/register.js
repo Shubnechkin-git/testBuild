@@ -1,15 +1,8 @@
 const mysql = require('mysql');
 const uuid = require('uuid');
 
-const register = (app) => {
+const register = (app, connection) => {
     app.post('/register', (req, res) => {
-        const connection = mysql.createConnection({
-            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-            user: 'ukpquiunilgd9a3d',
-            password: 'sKRLt00lD4FffUASauii',
-            database: 'bds8x3eqjt659zexhm6k',
-            port: 3306
-        });
         console.log(req.body);
         const { username, mail, password, number } = req.body;
         const sessionId = uuid.v4();
@@ -25,7 +18,6 @@ const register = (app) => {
                 res.json({ success: true });
             }
         });
-        connection.end();
     });
 }
 

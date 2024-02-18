@@ -1,22 +1,27 @@
 const path = require('path');
-const mysql = require('mysql');
 
-const getExpressBackendRoute = (app) => {
+const getAnyRoute = (app, connection) => {
+    if (process.env.NODE_ENV === 'production') {
+        // app.get("/*", function (req, res) {
+        //     // res.sendFile(path.join(__dirname + './../my-shop', 'build', 'index.html'));
+        //     res.sendFile(path.join(__dirname));
+        //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
+        // });
+        app.get('*', (req, res) => {
+            res.sendFile(path.join(__dirname, '../build', 'index.html'));
+        });
+    }
+}
+
+const getExpressBackendRoute = (app, connection) => {
     app.get('/express_backend', (req, res) => {
         res.send({ express: "Подключено" });
         console.log("App.js sessionId:", req.cookies.sessionId);
     });
 }
 
-const checkUser = (app) => {
+const checkUser = (app, connection) => {
     app.post('/checkUser', (req, res) => {
-        const connection = mysql.createConnection({
-            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-            user: 'ukpquiunilgd9a3d',
-            password: 'sKRLt00lD4FffUASauii',
-            database: 'bds8x3eqjt659zexhm6k',
-            port: 3306
-        });
 
         const { username, mail, number } = req.body;
         const query = 'SELECT COUNT(*) as count FROM users WHERE username = ? OR mail = ? Or number = ?';
@@ -31,24 +36,17 @@ const checkUser = (app) => {
             }
         });
 
-        connection.end();
+
     });
 }
 
-const getUserInfo = (app) => {
+const getUserInfo = (app, connection) => {
     // Эндпоинт для получения информации о пользователе
     app.post('/user', (req, res) => {
         const sessionId = req.cookies.sessionId;
 
         if (sessionId) {
             // Подключение к базе данных (замените значения на свои)
-            const connection = mysql.createConnection({
-                host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-                user: 'ukpquiunilgd9a3d',
-                password: 'sKRLt00lD4FffUASauii',
-                database: 'bds8x3eqjt659zexhm6k',
-                port: 3306
-            });
 
             // Подготовленный запрос для безопасности
             const query = 'SELECT id,username,mail,number FROM users WHERE sessionId = ?';
@@ -67,7 +65,7 @@ const getUserInfo = (app) => {
                 }
 
                 // Закрываем соединение с базой данных
-                connection.end();
+
             });
         } else {
             res.json({ success: false, error: 'Отсутствует sessionId' });
@@ -75,19 +73,12 @@ const getUserInfo = (app) => {
     });
 }
 
-const checkSession = (app) => {
+const checkSession = (app, connection) => {
     app.get('/checkSession', (req, res) => {
         const sessionId = req.cookies.sessionId;
 
         if (sessionId) {
             // Здесь вы должны выполнить запрос к базе данных для проверки существования сессии
-            const connection = mysql.createConnection({
-                host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-                user: 'ukpquiunilgd9a3d',
-                password: 'sKRLt00lD4FffUASauii',
-                database: 'bds8x3eqjt659zexhm6k',
-                port: 3306
-            });
 
             const query = 'SELECT COUNT(*) as count FROM users WHERE sessionId = ?';
 
@@ -100,7 +91,7 @@ const checkSession = (app) => {
                     res.json({ success: sessionExists });
                 }
 
-                connection.end();
+
             });
         } else {
             res.json({ success: false });
@@ -108,15 +99,8 @@ const checkSession = (app) => {
     });
 }
 
-const getProduct = (productId, categoryName, tableName) => {
+const getProduct = (productId, categoryName, tableName, connection) => {
     return new Promise((resolve, reject) => {
-        const connection = mysql.createConnection({
-            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-            user: 'ukpquiunilgd9a3d',
-            password: 'sKRLt00lD4FffUASauii',
-            database: 'bds8x3eqjt659zexhm6k',
-            port: 3306
-        });
 
         let productInfo = {
             table_name: tableName,
@@ -149,14 +133,14 @@ const getProduct = (productId, categoryName, tableName) => {
 
         connection.query(query, [productId], (error, results) => {
             if (error) {
-                connection.end();
+
                 reject('Ошибка при получении товара: ' + error.message);
             } else {
                 if (results.length > 0) {
                     productInfo.title = results[0].title;
                     productInfo.price = results[0].price;
                     productInfo.img = results[0].img;
-                    connection.end();
+
                     resolve(productInfo);
                 } else {
                     reject('Товар с id ' + productId + ' не найден в таблице ' + table_name);
@@ -167,29 +151,22 @@ const getProduct = (productId, categoryName, tableName) => {
 };
 
 
-const addToCart = (app) => {
-    // Подключение к базе данных
-    const connection = mysql.createConnection({
-        host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-        user: 'ukpquiunilgd9a3d',
-        password: 'sKRLt00lD4FffUASauii',
-        database: 'bds8x3eqjt659zexhm6k',
-        port: 3306
-    });
+const addToCart = (app, connection) => {
 
     // SQL-запрос для добавления товара в корзину
     const addToCartQuery = `
-        INSERT INTO cart (user_id, product_id, product_name, count, price, total_price, table_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO cart (user_id, product_id, product_name, category, count, price, total_price, table_name)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE count = count + VALUES(count), total_price = count * price
     `;
 
     app.post('/cart', async (req, res) => {
         // Получение данных о товаре из тела запроса
-        const { product_id, category, user_info } = req.body;
+        const { product_id, category, user_info, count } = req.body;
 
+        // console.log(req.body);
         // Получение информации о товаре из product_info
-        const product_info = await getProduct(product_id, category, null); // Предполагается, что product_info содержит информацию о товаре
+        const product_info = await getProduct(product_id, category, null, connection); // Предполагается, что product_info содержит информацию о товаре
 
         // Проверка наличия необходимых данных
         if (!product_id || !category || !user_info || !product_info) {
@@ -197,55 +174,101 @@ const addToCart = (app) => {
         }
 
         // Попытка выполнить SQL-запрос
-        connection.query(addToCartQuery, [user_info.id, product_id, product_info.title, 1, product_info.price, product_info.price, product_info.table_name], (error, results) => {
+        connection.query(addToCartQuery, [user_info.id, product_id, product_info.title, category, count, product_info.price, product_info.price, product_info.table_name], (error, results) => {
             if (error) {
                 console.error(error);
                 return res.status(500).json({ error: 'Произошла ошибка при добавлении товара в корзину' });
             } else {
-                return res.status(200).json({ success: true, message: 'Товар успешно добавлен в корзину' });
-            }
-        });
-    });
-};
-
-const getUserCart = (app) => {
-    app.post('/getCart', async (req, res) => {
-        const connection = mysql.createConnection({
-            host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-            user: 'ukpquiunilgd9a3d',
-            password: 'sKRLt00lD4FffUASauii',
-            database: 'bds8x3eqjt659zexhm6k',
-            port: 3306
-        });
-
-        const userId = req.body.sessionInfo.userInfo.id;
-        const query = `SELECT * FROM cart WHERE user_id = ?`;
-
-        connection.query(query, [userId], async (error, results) => {
-            if (error) {
-                connection.end();
-                console.error('Ошибка при получении корзины пользователя:', error);
-                res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
-            } else {
-                try {
-                    const cartItems = [];
-                    for (const item of results) {
-                        const productInfo = await getProduct(item.product_id, null, item.table_name);
-                        cartItems.push({ ...item, product_info: productInfo });
-                    }
-                    connection.end();
-                    console.log('Корзина пользователя успешно получена:', cartItems);
-                    res.status(200).json(cartItems);
-                } catch (error) {
-                    console.error('Ошибка при получении информации о продукте:', error);
-                    res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
+                if (count == 1) {
+                    return res.status(200).json({
+                        success: true, message: 'Товар успешно добавлен в корзину!', data: {
+                            product_id, product_info
+                        }
+                    });
+                }
+                else if (count == -1) {
+                    return res.status(200).json({
+                        success: true, message: 'Товар успешно удален из корзины!', data: {
+                            product_id, product_info
+                        }
+                    });
                 }
             }
         });
     });
 };
 
-const logutUser = (app) => {
+const deleteFromCart = (app, connection) => {
+    app.post('/deleteCart', async (req, res) => {
+
+        const id = req.body.id;
+        const query = `DELETE FROM cart WHERE id=?`;
+
+        connection.query(query, id, (results, error) => {
+            if (results) {
+                console.log(results);
+                return res.status(200).json({ success: true, message: 'Произошла ошибка при удаление товара из корзины!' })
+            }
+            else {
+                console.error(error);
+                return res.status(500).json({ success: false, error: 'Товар был успешно удален из корзины!' });
+            }
+        });
+    });
+}
+
+const getUserCart = (app, connection) => {
+    app.post('/getCart', async (req, res) => {
+        const userId = req.body.sessionInfo.userInfo.id;
+        if (req.body.cartProductId == null) {
+
+            const query = `SELECT * FROM cart WHERE user_id = ?`;
+
+            connection.query(query, [userId], async (error, results) => {
+                if (error) {
+
+                    console.error('Ошибка при получении корзины пользователя:', error);
+                    res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
+                } else {
+                    try {
+                        const cartItems = [];
+                        for (const item of results) {
+                            const productInfo = await getProduct(item.product_id, null, item.table_name, connection);
+                            cartItems.push({ ...item, product_info: productInfo });
+                        }
+
+                        // console.log('Корзина пользователя успешно получена:', cartItems);
+                        res.status(200).json(cartItems);
+                    } catch (error) {
+                        console.error('Ошибка при получении информации о продукте:', error);
+                        res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
+                    }
+                }
+            });
+        }
+        else {
+            const query = `SELECT * FROM cart WHERE id = ?`;
+
+            connection.query(query, [req.body.cartProductId], async (error, results) => {
+                if (error) {
+
+                    console.error('Ошибка при получении корзины пользователя:', error);
+                    res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
+                } else {
+                    try {
+                        res.status(200).json(results[0]);
+                    } catch (error) {
+                        console.error('Ошибка при получении информации о продукте:', error);
+                        res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
+                    }
+                }
+            });
+        }
+    });
+};
+
+
+const logutUser = (app, connection) => {
     app.post('/logout', (req, res) => {
         // Удаление куки сессии
         res.clearCookie('sessionId');
@@ -254,11 +277,13 @@ const logutUser = (app) => {
 }
 
 module.exports = {
+    getAnyRoute,
     getExpressBackendRoute,
     checkUser,
     getUserInfo,
     checkSession,
     logutUser,
     addToCart,
-    getUserCart
+    getUserCart,
+    deleteFromCart
 }

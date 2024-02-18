@@ -1,68 +1,38 @@
 const mysql = require('mysql');
 
-const getData = (tag, callback) => {
-    const connection = mysql.createConnection({
-        host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-        user: 'ukpquiunilgd9a3d',
-        password: 'sKRLt00lD4FffUASauii',
-        database: 'bds8x3eqjt659zexhm6k',
-        port: 3306
-    });
+const getData = (tag, connection) => {
+    return new Promise((resolve, reject) => {
+            let query = '';
+            switch (tag) {
+                case 'hot':
+                    query = 'SELECT * from items';
+                    break;
+                case 'disc':
+                    query = 'SELECT * from discounts';
+                    break;
+                case 'nov':
+                    query = 'SELECT * from novelty';
+                    break;
+                default:
+                    return reject(new Error('Invalid tag'));
+            }
 
-    connection.connect((err) => {
-        if (err) {
-            return callback(err, null);
-        }
-
-        if (tag === 'hot') {
-            connection.query('SELECT * from items', (error, results) => {
+            connection.query(query, (error, results) => {
                 if (error) {
-                    connection.end();
-                    return callback(error, null);
+                    return reject(error);
                 }
-
-                connection.end();
-                callback(null, results);
+                resolve(results); 
             });
-        } else if (tag === 'disc') {
-            connection.query('SELECT * from discounts', (error, results) => {
-                if (error) {
-                    connection.end();
-                    return callback(error, null);
-                }
-                connection.end();
-                callback(null, results);
-            });
-        }
-        else if (tag === 'nov') {
-            connection.query('SELECT * from novelty', (error, results) => {
-                if (error) {
-                    connection.end();
-                    return callback(error, null);
-                }
-                connection.end();
-                callback(null, results);
-            });
-        }
-    });
+        });
 };
 
-const getUser = (sessionId) => {
-    const connection = mysql.createConnection({
-        host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
-        user: 'ukpquiunilgd9a3d',
-        password: 'sKRLt00lD4FffUASauii',
-        database: 'bds8x3eqjt659zexhm6k',
-        port: 3306
-    });
 
+
+const getUser = (sessionId, callback, connection) => {
     connection.query(`SELECT username FROM users WHERE session = ${sessionId}`, (error, results) => {
         if (error) {
-            connection.end();
             return callback(error, null);
         }
-
-        connection.end();
         callback(null, results);
     });
 }
