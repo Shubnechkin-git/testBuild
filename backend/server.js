@@ -53,10 +53,11 @@ app.options('/register', cors());
 app.options('/catalog', cors());
 
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'gena_booker'
+  host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
+  user: 'ukpquiunilgd9a3d',
+  password: 'sKRLt00lD4FffUASauii',
+  database: 'bds8x3eqjt659zexhm6k',
+  port: 3306
 });
 
 register(app, connection);
