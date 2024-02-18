@@ -1,14 +1,8 @@
 const mysql = require('mysql');
 const uuid = require('uuid');
 
-const login = (app) => {
+const login = (app, connection) => {
     app.post('/login', (req, res) => {
-        const connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'gena_booker'
-        });
 
         const { username, password } = req.body;
         console.log(req.body);
@@ -38,7 +32,7 @@ const login = (app) => {
                     }
 
                     // Закрываем соединение после завершения всех запросов
-                    
+
                 });
             }
         });
