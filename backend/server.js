@@ -104,15 +104,15 @@ setColor(app, connection); //смена цвета заднего фона
 
 getColor(app, connection); //ответ на /getColor - вывод настройки цветов сайта  
 
-app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
-});
-
 // app.use((req, res) => {
-//   if (req.url != '/' && req.url != '/catalog' && req.url != '/profile' && req.url != '/about' && req.url != '/cart') {
-//     console.log(req.url);
-//     res.status(404).sendFile(path.join(__dirname, '../build', '404.html'));
-//   }
-//   else
-//     res.status(404).sendFile(path.join(__dirname, '../build', 'index.html'));
+//   res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
 // });
+
+app.use((req, res) => {
+  if (req.url != '/' && req.url != '/catalog' && req.url != '/profile' && req.url != '/about' && req.url != '/cart') {
+    console.log(req.url);
+    res.status(404).sendFile(path.join(__dirname, '../build', '404.html'));
+  }
+  else
+    res.status(404).sendFile(path.join(__dirname, '../build', 'index.html'));
+});
