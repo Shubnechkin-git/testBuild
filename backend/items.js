@@ -10,7 +10,7 @@ const getHotItems = (app, connection) => {
             res.status(500).send('Internal Server Error');
         }
     });
-}
+} 
 
 const getNoveltyItems = (app, connection) => {
     app.post('/novelty_items', async (req, res) => {

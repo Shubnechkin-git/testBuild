@@ -11,11 +11,12 @@ const login = require('./login');
 const register = require('./register');
 const { getHotItems, getNoveltyItems, getDiscountItems, getProduct } = require('./items');
 const { deleteFromCart, getUserCart, getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart } = require('./routes');
+const { setColor, getColor } = require('./admin');
 const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
 
-// var cors = require('cors')
+var cors = require('cors')
 // const corsOptions = {
 //   origin: 'http://localhost:3000', // Укажите ваш домен React-приложения
 //   optionsSuccessStatus: 200, // некоторые старые браузеры (IE11, старый Android) не отправляют 204
@@ -30,7 +31,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../build/')));
+app.use(express.static(path.join(__dirname, '../my-shop/build/')));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -50,7 +51,14 @@ app.use((req, res, next) => {
 })
 
 app.options('/register', cors());
-// app.options('/catalog', cors());
+app.options('/catalog', cors());
+
+// const connection = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'root',
+//   database: 'gena_booker'
+// });
 
 const connection = mysql.createConnection({
   host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
@@ -86,21 +94,25 @@ getUserInfo(app, connection);//ответ на user
 
 addToCart(app, connection);//добавление товара в корзину /cart  
 
-getUserCart(app, connection); //ответ на /getCart - вывод товаров в корзину 
+getUserCart(app, connection); //ответ на /getCart - вывод товаров в корзину  
 
 getExpressBackendRoute(app, connection);//ответ на express_backend  
 
 deleteFromCart(app, connection);//удаляет овар из коризины 
 
-// app.use((req, res) => {
-//   res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
-// }); 
+setColor(app, connection); //смена цвета заднего фона
+
+getColor(app, connection); //ответ на /getColor - вывод настройки цветов сайта  
 
 app.use((req, res) => {
-  if (req.url != '/' && req.url != '/catalog' && req.url != '/profile' && req.url != '/about' && req.url != '/cart') {
-    console.log(req.url);
-    res.status(404).sendFile(path.join(__dirname, '../build', '404.html'));
-  }
-  else
-    res.status(404).sendFile(path.join(__dirname, '../build', 'index.html'));
+  res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
 });
+
+// app.use((req, res) => {
+//   if (req.url != '/' && req.url != '/catalog' && req.url != '/profile' && req.url != '/about' && req.url != '/cart') {
+//     console.log(req.url);
+//     res.status(404).sendFile(path.join(__dirname, '../build', '404.html'));
+//   }
+//   else
+//     res.status(404).sendFile(path.join(__dirname, '../build', 'index.html'));
+// });

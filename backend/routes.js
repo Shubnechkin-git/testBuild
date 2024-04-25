@@ -8,7 +8,7 @@ const getAnyRoute = (app, connection) => {
         //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
         // });
         app.get('*', (req, res) => {
-            res.sendFile(path.join(__dirname, '../build', 'index.html'));
+            res.sendFile(path.join(__dirname, '../my-shop/build', 'index.html'));
         });
     }
 }
@@ -49,7 +49,7 @@ const getUserInfo = (app, connection) => {
             // Подключение к базе данных (замените значения на свои)
 
             // Подготовленный запрос для безопасности
-            const query = 'SELECT id,username,mail,number FROM users WHERE sessionId = ?';
+            const query = 'SELECT id,username,mail,number,isAdmin FROM users WHERE sessionId = ?';
 
             connection.query(query, [sessionId], (error, results) => {
                 if (error) {
