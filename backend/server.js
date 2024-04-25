@@ -16,7 +16,7 @@ const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
 
-var cors = require('cors')
+// var cors = require('cors')
 // const corsOptions = {
 //   origin: 'http://localhost:3000', // Укажите ваш домен React-приложения
 //   optionsSuccessStatus: 200, // некоторые старые браузеры (IE11, старый Android) не отправляют 204
@@ -31,7 +31,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../my-shop/build/')));
+// app.use(express.static(path.join(__dirname, '../my-shop/build/')));
+app.use(express.static(path.join(__dirname, '../build/')));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
