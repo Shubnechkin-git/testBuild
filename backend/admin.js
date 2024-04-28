@@ -1,6 +1,12 @@
 const getColor = (app, connection) => {
     app.get('/getColor', async (req, res) => {
-        return res.status(200).json({ success: true, message: 'Настройки получены!' })
+        connection.query(`SELECT * FROM settings`, (result, error) => {
+            if (error) {
+                return res.status(200).json({ success: true, colors: error, message: 'Настройки получены!' })
+            } else {
+                return res.status(500).json({ success: false, colors: error, message: error.message });
+            }
+        });
     });
 }
 
