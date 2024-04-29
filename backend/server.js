@@ -61,7 +61,7 @@ app.options('/catalog', cors());
 //   database: 'gena_booker'
 // });
 
-const connection = mysql.createPool({
+const connection = mysql.createConnection({
   host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
   user: 'ukpquiunilgd9a3d',
   password: 'sKRLt00lD4FffUASauii',
