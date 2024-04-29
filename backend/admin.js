@@ -4,7 +4,7 @@ const getColor = (app, connection) => {
             if (error) {
                 return res.status(200).json({ success: true, colors: error, message: 'Настройки получены!' })
             } else {
-                return res.status(500).json({ success: false, colors: error, message: error.message });
+                return res.status(500).json({ success: false, colors: error });
             }
         });
     });
@@ -29,7 +29,47 @@ const setColor = (app, connection) => {
     });
 };
 
+const getAllProducts = (app, connection) => {
+    app.get('/get_all_products', (req, res) => {
+        const sql = `
+            SELECT id, title, price, img, 'discounts' as table_name FROM discounts
+            UNION
+            SELECT id, title, price, img, 'items' as table_name FROM items
+            UNION
+            SELECT id, title, price, img, 'novelty' as table_name FROM novelty
+            UNION
+            SELECT id, title, price, img, 'products' as table_name FROM products
+        `;
+        connection.query(sql, (error, result) => {
+            if (result) {
+                return res.status(200).json({ success: true, data: result, message: "Товары получены!" });
+            }
+            else if (error) {
+                return res.status(500).json({ success: false, data: error });
+            }
+        });
+    })
+}
+
+const getAllOrders = (app, connection) => {
+    
+    app.get('/orders', (req, res) => {
+        connection.query('SELECT * FROM cart', (error, result) => {
+            if (result) {
+                return res.status(200).json({ success: true, data: result, message: "Заказы получены получены!" });
+            }
+            else if (error) {
+                return res.status(500).json({ success: true, data: error });
+            }
+        });
+    });
+    // connection.end();
+}
+
+
 module.exports = {
     setColor,
-    getColor
+    getColor,
+    getAllProducts,
+    getAllOrders
 }; 

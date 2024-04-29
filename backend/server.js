@@ -11,7 +11,7 @@ const login = require('./login');
 const register = require('./register');
 const { getHotItems, getNoveltyItems, getDiscountItems, getProduct } = require('./items');
 const { deleteFromCart, getUserCart, getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart } = require('./routes');
-const { setColor, getColor } = require('./admin');
+const { setColor, getColor, getAllProducts, getAllOrders } = require('./admin');
 const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
@@ -61,7 +61,7 @@ app.options('/catalog', cors());
 //   database: 'gena_booker'
 // });
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: 'bds8x3eqjt659zexhm6k-mysql.services.clever-cloud.com',
   user: 'ukpquiunilgd9a3d',
   password: 'sKRLt00lD4FffUASauii',
@@ -105,6 +105,9 @@ setColor(app, connection); //смена цвета заднего фона
 
 getColor(app, connection); //ответ на /getColor - вывод настройки цветов сайта  
 
+getAllProducts(app, connection); //ответ на /get_all_products - вывод товаров в адмиеку 
+
+getAllOrders(app, connection); //ответ на /orders - вывод товаров в адмиеку 
 // app.use((req, res) => {
 //   res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
 // });
