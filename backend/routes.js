@@ -7,9 +7,9 @@ const getAnyRoute = (app, connection) => {
         //     res.sendFile(path.join(__dirname));
         //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
         // });
-        app.get('*', (req, res) => {
-            res.sendFile(path.join(__dirname, '../build', 'index.html'));
-        });
+        // app.get('*', (req, res) => {
+        //     res.sendFile(path.join(__dirname, '../build', 'index.html'));
+        // });
     }
 }
 
@@ -18,7 +18,7 @@ const getExpressBackendRoute = (app, connection) => {
         res.send({ express: "Подключено" });
         console.log("App.js sessionId:", req.cookies.sessionId);
     });
-}
+} 
 
 const checkUser = (app, connection) => {
     app.post('/checkUser', (req, res) => {
