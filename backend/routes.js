@@ -1,4 +1,174 @@
+const { text } = require('express');
 const path = require('path');
+
+const sendMail = (app, connectio) => {
+    const nodemailer = require("nodemailer");
+
+    const transporter = nodemailer.createTransport({
+        host: "smtp.mail.ru",
+        port: 587,
+        secure: false, // Use `true` for TLS
+        auth: {
+            user: "discursiveee@mail.ru",
+            pass: "UsUhK7VygPsfWYxe5Ny9",
+        },
+    });
+    app.post('/send_email', (req, res) => {
+        console.log(req.body);
+        if (req.body.type === 'contact')
+            transporter.sendMail({
+                from: '"GenaBooker_Store" <discursiveee@mail.ru>', // sender address
+                to: req.body.mail, // list of receivers
+                subject: `Спасибо за обращение в GenaBooker_Store, ${req.body.username}!`, // Subject line
+                text: `Добрый день, ${req.body.username},\n\nСпасибо за обращение в GenaBooker_Store. Мы ценим ваше время и обязательно уделим внимание вашему вопросу.\n\nВы написали:\n\n${req.body.text}\n\nМы свяжемся с вами в ближайшее время, чтобы решить ваш вопрос.\n\nС уважением,\nКоманда GenaBooker_Store`, // plain text body
+                html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        width: 80%;
+                        margin: auto;
+                        background-color: #f8f9fa;
+                        border-radius: 5px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                    }
+                    .header {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: #343a40;
+                        color: #fff;
+                        border-top-left-radius: 5px;
+                        border-top-right-radius: 5px;
+                    }
+                    .main-content {
+                        padding: 20px;
+                    }
+                    .footer {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: #343a40;
+                        color: #fff;
+                        border-bottom-left-radius: 5px;
+                        border-bottom-right-radius: 5px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>GenaBooker_Store</h1>
+                    </div>
+                    <div class="main-content">
+                        <p>Добрый день, ${req.body.username}!</p>
+                        <p>Спасибо за обращение в GenaBooker_Store. Мы ценим ваше время и обязательно уделим внимание вашему вопросу.</p>
+                        <p>Вы написали:</p>
+                        <p><strong>${req.body.text}</strong></p>
+                        <p>Мы свяжемся с вами в ближайшее время по номеру телефона ${req.body.number}, чтобы решить ваш вопрос.</p>
+                    </div>
+                    <div class="footer">
+                        <p>С уважением,</p>
+                        <p>Команда GenaBooker_Store</p>
+                    </div>
+                </div>
+            </body>
+            </html> 
+            `, // html body
+            }, (error, info) => {
+                // if (error) {
+                // }
+                if (info) return res.status(200).json({ success: true, data: info, message: 'Сообщение доставленно!' });
+                else {
+                    return res.status(500).json({ success: false, message: "Ошибка повторите позже!" });
+                }
+            });
+        else if (req.body.type === 'order') {
+            transporter.sendMail({
+                from: '"GenaBooker_Store" <discursiveee@mail.ru>', // sender address
+                to: req.body.email, // list of receivers
+                subject: `Ваш заказ №X в GenaBooker_Store находится в обработке, ${req.body.firstname}!`, // Subject line orderNumber
+                text: `Добрый день, ${req.body.firstname},\n\nВаш заказ №X в GenaBooker_Store находится в обработке. Мы ценим ваше время и обязательно уделим внимание вашему заказу.\n\nЗаказ:\n\n${req.body.order}\n\nДанные для доставки:\n\nФамилия: ${req.body.lastname}\nИмя: ${req.body.firstname}\nОтчество: ${req.body.patrynomic}\nEmail: ${req.body.email}\nТелефон: ${req.body.tel}\nАдрес: ${req.body.address}\n\nМы свяжемся с вами в ближайшее время по номеру телефона ${req.body.tel}, чтобы подтвердить ваш заказ.\n\nС уважением,\nКоманда GenaBooker_Store`, // plain text body orderNumber
+                html: `
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                          <style>
+                              body {
+                                  font-family: Arial, sans-serif;
+                                  margin: 0;
+                                  padding: 0;
+                              }
+                              .container {
+                                  width: 80%;
+                                  margin: auto;
+                                  background-color: #f8f9fa;
+                                  border-radius: 5px;
+                                  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                              }
+                              .header {
+                                  text-align: center;
+                                  padding: 20px;
+                                  background-color: #343a40;
+                                  color: #fff;
+                                  border-top-left-radius: 5px;
+                                  border-top-right-radius: 5px;
+                              }
+                              .main-content {
+                                  padding: 20px;
+                              }
+                              .footer {
+                                  text-align: center;
+                                  padding: 20px;
+                                  background-color: #343a40;
+                                  color: #fff;
+                                  border-bottom-left-radius: 5px;
+                                  border-bottom-right-radius: 5px;
+                              }
+                          </style>
+                      </head>
+                      <body>
+                          <div class="container">
+                              <div class="header">
+                                  <h1>GenaBooker_Store</h1>
+                              </div>
+                              <div class="main-content">
+                                  <p>Добрый день, ${req.body.firstname}!</p>
+                                  <p>Ваш заказ №X в GenaBooker_Store находится в обработке. Мы ценим ваше время и обязательно уделим внимание вашему заказу.</p> //orderNumber
+                                  <p>Заказ:</p>
+                                  <p><strong>xxxxxxxxxxx</strong></p>//req.body.order
+                                  <p>Данные для доставки:</p>
+                                  <p><strong>Фамилия:</strong> ${req.body.lastname}</p>
+                                  <p><strong>Имя:</strong> ${req.body.firstname}</p>
+                                  <p><strong>Отчество:</strong> ${req.body.patrynomic}</p>
+                                  <p><strong>Email:</strong> ${req.body.email}</p>
+                                  <p><strong>Телефон:</strong> ${req.body.tel}</p>
+                                  <p><strong>Адрес:</strong> ${req.body.address}</p>
+                                  <p>Мы свяжемся с вами в ближайшее время по номеру телефона ${req.body.tel}, чтобы подтвердить ваш заказ.</p>
+                              </div>
+                              <div class="footer">
+                                  <p>С уважением,</p>
+                                  <p>Команда GenaBooker_Store</p>
+                              </div>
+                          </div>
+                      </body>
+                      </html>
+              ` // html body
+            }, (error, info) => {
+                // if (error) {
+                // }
+                if (info) return res.status(200).json({ success: true, data: info, message: 'Сообщение доставленно!' });
+                else {
+                    return res.status(500).json({ success: false, message: "Ошибка повторите позже!" });
+                }
+            });
+        } else { res.status(500).json({ success: false, message: 'Ошибка повторите позже!' }) }
+    });
+}
 
 const getAnyRoute = (app, connection) => {
     if (process.env.NODE_ENV === 'production') {
@@ -8,7 +178,7 @@ const getAnyRoute = (app, connection) => {
         //     // res.sendFile(path.join(__dirname + '/build', 'index.html'));
         // });
         // app.get('*', (req, res) => {
-        //     res.sendFile(path.join(__dirname, '../build', 'index.html'));
+        //     res.sendFile(path.join(__dirname, '../my-shop/build', 'index.html'));
         // });
     }
 }
@@ -18,7 +188,7 @@ const getExpressBackendRoute = (app, connection) => {
         res.send({ express: "Подключено" });
         console.log("App.js sessionId:", req.cookies.sessionId);
     });
-} 
+}
 
 const checkUser = (app, connection) => {
     app.post('/checkUser', (req, res) => {
@@ -285,5 +455,6 @@ module.exports = {
     logutUser,
     addToCart,
     getUserCart,
-    deleteFromCart
+    deleteFromCart,
+    sendMail
 }

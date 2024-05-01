@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const login = require('./login');
 const register = require('./register');
 const { getHotItems, getNoveltyItems, getDiscountItems, getProduct } = require('./items');
-const { deleteFromCart, getUserCart, getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart } = require('./routes');
+const { deleteFromCart, getUserCart, getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart, sendMail } = require('./routes');
 const { setColor, getColor, getAllProducts, getAllOrders } = require('./admin');
 const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
@@ -108,6 +108,9 @@ getColor(app, connection); //ответ на /getColor - вывод настро
 getAllProducts(app, connection); //ответ на /get_all_products - вывод товаров в адмиеку 
 
 getAllOrders(app, connection); //ответ на /orders - вывод товаров в адмиеку 
+
+sendMail(app, connection); //ответ на /send_email - отправка письма на почту
+
 // app.use((req, res) => {
 //   res.status(404).sendFile(path.join(__dirname, '../my-shop/build/', 'index.html'));
 // });

@@ -32,13 +32,13 @@ const setColor = (app, connection) => {
 const getAllProducts = (app, connection) => {
     app.get('/get_all_products', (req, res) => {
         const sql = `
-            SELECT id, title, price, img, 'discounts' as table_name FROM discounts
+            SELECT id, title, price, img, 'discounts' as table_name, available FROM discounts
             UNION
-            SELECT id, title, price, img, 'items' as table_name FROM items
+            SELECT id, title, price, img, 'items' as table_name, available FROM items
             UNION
-            SELECT id, title, price, img, 'novelty' as table_name FROM novelty
+            SELECT id, title, price, img, 'novelty' as table_name, available FROM novelty
             UNION
-            SELECT id, title, price, img, 'products' as table_name FROM products
+            SELECT id, title, price, img, 'products' as table_name, available FROM products
         `;
         connection.query(sql, (error, result) => {
             if (result) {
