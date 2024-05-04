@@ -3,6 +3,7 @@
   "proxy": "https://testbuild-27ld.onrender.com/",
   "dependencies": {
     "@emotion/css": "^11.11.2",
+    "axios": "^1.6.8",
     "bcryptjs-react": "^2.4.6",
     "bootstrap": "^5.3.2",
     "cookie-parser": "^1.4.6",
@@ -31,9 +32,11 @@
     "webpack-cli": "^5.1.4"
   },
   "devServer": {
-    "setupMiddlewares": [{
-      "name": "my-custom-middleware",
-      "middleware": "function (app, server) { app.get('/test', (req, res) => { res.json({ message: 'Hello!' }); }); }"
-    }]
+    "setupMiddlewares": [
+      {
+        "name": "my-custom-middleware",
+        "middleware": "function (app, server) { app.get('/test', (req, res) => { res.json({ message: 'Hello!' }); }); }"
+      }
+    ]
   }
 }

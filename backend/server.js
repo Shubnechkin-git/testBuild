@@ -3,6 +3,7 @@ const app = express(); //Строка 2
 const port = process.env.PORT || 5000; //Строка 3
 const path = require('path');
 const mysql = require('mysql');
+const axios = require('axios');
 
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
@@ -21,7 +22,8 @@ var cors = require('cors')
 const url = 'https://testbuild-27ld.onrender.com/';
 
 // Интервал пингования в миллисекундах (например, 1 минут)
-const pingInterval = 15 * 60 * 1000;
+// const pingInterval = 13 * 60 * 1000;
+const pingInterval = 1 * 60 * 1000;
 
 // Функция для пингования сервера
 function pingServer() {
