@@ -1,7 +1,9 @@
 const { text } = require('express');
 const path = require('path');
 
-const sendMail = (app, connectio) => {
+const mysql = require('mysql');
+
+const sendMail = (app, pool, connection) => {
     const nodemailer = require("nodemailer");
 
     const transporter = nodemailer.createTransport({
@@ -13,6 +15,7 @@ const sendMail = (app, connectio) => {
             pass: "UsUhK7VygPsfWYxe5Ny9",
         },
     });
+
     app.post('/send_email', (req, res) => {
         console.log(req.body);
         if (req.body.type === 'contact')
@@ -121,7 +124,7 @@ const sendMail = (app, connectio) => {
                               .main-content {
                                   padding: 20px;
                               }
-                              .footer {
+                              .footer { 
                                   text-align: center;
                                   padding: 20px;
                                   background-color: #343a40;
@@ -170,7 +173,7 @@ const sendMail = (app, connectio) => {
     });
 }
 
-const getAnyRoute = (app, connection) => {
+const getAnyRoute = (app, pool, connection) => {
     if (process.env.NODE_ENV === 'production') {
         // app.get("/*", function (req, res) {
         //     // res.sendFile(path.join(__dirname + './../my-shop', 'build', 'index.html'));
@@ -183,34 +186,40 @@ const getAnyRoute = (app, connection) => {
     }
 }
 
-const getExpressBackendRoute = (app, connection) => {
+const getExpressBackendRoute = (app, pool, connection) => {
     app.get('/express_backend', (req, res) => {
         res.send({ express: "Подключено" });
         console.log("App.js sessionId:", req.cookies.sessionId);
     });
 }
 
-const checkUser = (app, connection) => {
+const checkUser = (app, pool, connection) => {
     app.post('/checkUser', (req, res) => {
 
         const { username, mail, number } = req.body;
         const query = 'SELECT COUNT(*) as count FROM users WHERE username = ? OR mail = ? Or number = ?';
-
-        connection.query(query, [username, mail, number], (error, results) => {
-            if (error) {
-                console.error('Ошибка при проверке пользователя:', error);
-                res.status(500).json({ success: false, error: 'Ошибка при проверке пользователя' });
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
             } else {
-                const userExists = results[0].count > 0;
-                res.json({ success: true, exists: userExists });
+                connection.query(query, [username, mail, number], (error, results) => {
+                    if (error) {
+                        console.error('Ошибка при проверке пользователя:', error);
+                        connection.release();
+                        res.status(500).json({ success: false, error: 'Ошибка при проверке пользователя' });
+                    } else {
+                        const userExists = results[0].count > 0;
+                        connection.release();
+                        res.json({ success: true, exists: userExists });
+                    }
+                });
             }
-        });
-
-
+        }
+        );
     });
 }
 
-const getUserInfo = (app, connection) => {
+const getUserInfo = (app, pool, connection) => {
     // Эндпоинт для получения информации о пользователе
     app.post('/user', (req, res) => {
         const sessionId = req.cookies.sessionId;
@@ -220,48 +229,58 @@ const getUserInfo = (app, connection) => {
 
             // Подготовленный запрос для безопасности
             const query = 'SELECT id,username,mail,number,isAdmin FROM users WHERE sessionId = ?';
-
-            connection.query(query, [sessionId], (error, results) => {
-                if (error) {
-                    console.error('Ошибка при запросе к базе данных:', error);
-                    res.json({ success: false, error: 'Ошибка при запросе к базе данных' });
+            pool.getConnection((err, connection) => {
+                if (err) {
+                    res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
                 } else {
-                    if (results.length > 0) {
-                        const userInfo = results[0]; // Предполагаем, что результат - это объект пользователя
-                        res.json({ success: true, user: userInfo });
-                    } else {
-                        res.json({ success: false, error: 'Пользователь не найден' });
-                    }
+                    connection.query(query, [sessionId], (error, results) => {
+                        if (error) {
+                            console.error('Ошибка при запросе к базе данных:', error);
+                            res.json({ success: false, error: 'Ошибка при запросе к базе данных' });
+                        } else {
+                            if (results.length > 0) {
+                                const userInfo = results[0]; // Предполагаем, что результат - это объект пользователя
+                                connection.release();
+                                res.json({ success: true, user: userInfo });
+                            } else {
+                                connection.release();
+                                res.json({ success: false, error: 'Пользователь не найден' });
+                            }
+                        }
+
+                        // Закрываем соединение с базой данных
+
+                    });
                 }
-
-                // Закрываем соединение с базой данных
-
-            });
+            }
+            );
         } else {
             res.json({ success: false, error: 'Отсутствует sessionId' });
         }
     });
 }
 
-const checkSession = (app, connection) => {
+const checkSession = (app, pool, connection) => {
     app.get('/checkSession', (req, res) => {
         const sessionId = req.cookies.sessionId;
-
         if (sessionId) {
-            // Здесь вы должны выполнить запрос к базе данных для проверки существования сессии
-
             const query = 'SELECT COUNT(*) as count FROM users WHERE sessionId = ?';
-
-            connection.query(query, [sessionId], (error, results) => {
-                if (error) {
-                    console.error('Ошибка при проверке сессии:', error);
-                    res.status(500).json({ success: false, error: 'Ошибка при проверке сессии' });
+            pool.getConnection((err, connection) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
                 } else {
-                    const sessionExists = results[0].count > 0;
-                    res.json({ success: sessionExists });
+                    connection.query(query, [sessionId], (error, results) => {
+                        connection.release();
+                        if (error) {
+                            console.error('Ошибка при проверке сессии:', error);
+                            res.status(500).json({ success: false, error: 'Ошибка при проверке сессии' });
+                        } else {
+                            const sessionExists = results[0].count > 0;
+                            res.json({ success: sessionExists });
+                        }
+                    });
                 }
-
-
             });
         } else {
             res.json({ success: false });
@@ -269,7 +288,7 @@ const checkSession = (app, connection) => {
     });
 }
 
-const getProduct = (productId, categoryName, tableName, connection) => {
+const getProduct = (productId, categoryName, tableName, pool, connection) => {
     return new Promise((resolve, reject) => {
 
         let productInfo = {
@@ -300,28 +319,37 @@ const getProduct = (productId, categoryName, tableName, connection) => {
         }
 
         const query = `SELECT * FROM ${productInfo.table_name} WHERE id = ?`;
-
-        connection.query(query, [productId], (error, results) => {
-            if (error) {
-
-                reject('Ошибка при получении товара: ' + error.message);
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
             } else {
-                if (results.length > 0) {
-                    productInfo.title = results[0].title;
-                    productInfo.price = results[0].price;
-                    productInfo.img = results[0].img;
+                connection.query(query, [productId], (error, results) => {
+                    if (error) {
 
-                    resolve(productInfo);
-                } else {
-                    reject('Товар с id ' + productId + ' не найден в таблице ' + table_name);
-                }
+                        connection.release();
+                        reject('Ошибка при получении товара: ' + error.message);
+                    } else {
+                        if (results.length > 0) {
+                            productInfo.title = results[0].title;
+                            productInfo.price = results[0].price;
+                            productInfo.img = results[0].img;
+
+                            connection.release();
+                            resolve(productInfo);
+                        } else {
+                            connection.release();
+                            reject('Товар с id ' + productId + ' не найден в таблице ' + table_name);
+                        }
+                    }
+                });
             }
-        });
+        }
+        );
     });
 };
 
 
-const addToCart = (app, connection) => {
+const addToCart = (app, pool, connection) => {
 
     // SQL-запрос для добавления товара в корзину
     const addToCartQuery = `
@@ -336,7 +364,7 @@ const addToCart = (app, connection) => {
 
         // console.log(req.body);
         // Получение информации о товаре из product_info
-        const product_info = await getProduct(product_id, category, null, connection); // Предполагается, что product_info содержит информацию о товаре
+        const product_info = await getProduct(product_id, category, null, pool, connection); // Предполагается, что product_info содержит информацию о товаре
 
         // Проверка наличия необходимых данных
         if (!product_id || !category || !user_info || !product_info) {
@@ -344,101 +372,137 @@ const addToCart = (app, connection) => {
         }
 
         // Попытка выполнить SQL-запрос
-        connection.query(addToCartQuery, [user_info.id, product_id, product_info.title, category, count, product_info.price, product_info.price, product_info.table_name], (error, results) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).json({ error: 'Произошла ошибка при добавлении товара в корзину' });
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
             } else {
-                if (count == 1) {
-                    return res.status(200).json({
-                        success: true, message: 'Товар успешно добавлен в корзину!', data: {
-                            product_id, product_info
+                connection.query(addToCartQuery, [user_info.id, product_id, product_info.title, category, count, product_info.price, product_info.price, product_info.table_name], (error, results) => {
+                    if (error) {
+                        connection.release();
+                        console.error(error);
+                        return res.status(500).json({ error: 'Произошла ошибка при добавлении товара в корзину' });
+                    } else {
+                        if (count == 1) {
+                            connection.release();
+                            return res.status(200).json({
+                                success: true, message: 'Товар успешно добавлен в корзину!', data: {
+                                    product_id, product_info
+                                }
+                            });
                         }
-                    });
-                }
-                else if (count == -1) {
-                    return res.status(200).json({
-                        success: true, message: 'Товар успешно удален из корзины!', data: {
-                            product_id, product_info
+                        else if (count == -1) {
+                            connection.release();
+                            return res.status(200).json({
+                                success: true, message: 'Товар успешно удален из корзины!', data: {
+                                    product_id, product_info
+                                }
+                            });
                         }
-                    });
-                }
+                    }
+                });
             }
-        });
+        }
+        );
     });
 };
 
-const deleteFromCart = (app, connection) => {
+const deleteFromCart = (app, pool, connection) => {
     app.post('/deleteCart', async (req, res) => {
-
         const id = req.body.id;
         const query = `DELETE FROM cart WHERE id=?`;
-
-        connection.query(query, id, (results, error) => {
-            if (results) {
-                console.log(results);
-                return res.status(200).json({ success: true, message: 'Произошла ошибка при удаление товара из корзины!' })
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
+            } else {
+                connection.query(query, id, (results, error) => {
+                    if (results) {
+                        console.log(results);
+                        connection.release();
+                        return res.status(200).json({ success: true, message: 'Произошла ошибка при удаление товара из корзины!' })
+                    }
+                    else {
+                        console.error(error);
+                        connection.release();
+                        return res.status(500).json({ success: false, error: 'Товар был успешно удален из корзины!' });
+                    }
+                });
             }
-            else {
-                console.error(error);
-                return res.status(500).json({ success: false, error: 'Товар был успешно удален из корзины!' });
-            }
-        });
+        }
+        );
     });
 }
 
-const getUserCart = (app, connection) => {
+const getUserCart = (app, pool, connection) => {
     app.post('/getCart', async (req, res) => {
         const userId = req.body.sessionInfo.userInfo.id;
         if (req.body.cartProductId == null) {
 
             const query = `SELECT * FROM cart WHERE user_id = ?`;
-
-            connection.query(query, [userId], async (error, results) => {
-                if (error) {
-
-                    console.error('Ошибка при получении корзины пользователя:', error);
-                    res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
+            pool.getConnection((err, connection) => {
+                if (err) {
+                    res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
                 } else {
-                    try {
-                        const cartItems = [];
-                        for (const item of results) {
-                            const productInfo = await getProduct(item.product_id, null, item.table_name, connection);
-                            cartItems.push({ ...item, product_info: productInfo });
-                        }
+                    connection.query(query, [userId], async (error, results) => {
+                        if (error) {
 
-                        // console.log('Корзина пользователя успешно получена:', cartItems);
-                        res.status(200).json(cartItems);
-                    } catch (error) {
-                        console.error('Ошибка при получении информации о продукте:', error);
-                        res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
-                    }
+                            console.error('Ошибка при получении корзины пользователя:', error);
+                            connection.release();
+                            res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
+                        } else {
+                            try {
+                                const cartItems = [];
+                                for (const item of results) {
+                                    const productInfo = await getProduct(item.product_id, null, item.table_name, pool, connection);
+                                    cartItems.push({ ...item, product_info: productInfo });
+                                }
+
+                                // console.log('Корзина пользователя успешно получена:', cartItems);
+                                connection.release();
+                                res.status(200).json(cartItems);
+                            } catch (error) {
+                                console.error('Ошибка при получении информации о продукте:', error);
+                                connection.release();
+                                res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
+                            }
+                        }
+                    });
                 }
-            });
+            }
+            );
         }
         else {
             const query = `SELECT * FROM cart WHERE id = ?`;
 
-            connection.query(query, [req.body.cartProductId], async (error, results) => {
-                if (error) {
-
-                    console.error('Ошибка при получении корзины пользователя:', error);
-                    res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
+            pool.getConnection((err, connection) => {
+                if (err) {
+                    res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
                 } else {
-                    try {
-                        res.status(200).json(results[0]);
-                    } catch (error) {
-                        console.error('Ошибка при получении информации о продукте:', error);
-                        res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
-                    }
+                    connection.query(query, [req.body.cartProductId], async (error, results) => {
+                        if (error) {
+
+                            console.error('Ошибка при получении корзины пользователя:', error);
+                            connection.release();
+                            res.status(500).json({ error: 'Ошибка при получении корзины пользователя' });
+                        } else {
+                            try {
+                                connection.release();
+                                res.status(200).json(results[0]);
+                            } catch (error) {
+                                console.error('Ошибка при получении информации о продукте:', error);
+                                connection.release();
+                                res.status(500).json({ error: 'Ошибка при получении информации о продукте' });
+                            }
+                        }
+                    });
                 }
-            });
+            }
+            );
         }
     });
 };
 
 
-const logutUser = (app, connection) => {
+const logutUser = (app, pool, connection) => {
     app.post('/logout', (req, res) => {
         // Удаление куки сессии
         res.clearCookie('sessionId');

@@ -1,35 +1,54 @@
-const getColor = (app, connection) => {
+const mysql = require('mysql');
+
+const getColor = (app, pool, connection) => {
     app.get('/getColor', async (req, res) => {
-        connection.query(`SELECT * FROM settings`, (result, error) => {
-            if (error) {
-                return res.status(200).json({ success: true, colors: error, message: 'Настройки получены!' })
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
             } else {
-                return res.status(500).json({ success: false, colors: error });
+                connection.query(`SELECT * FROM settings`, (result, error) => {
+                    if (error) {
+                        connection.release();
+                        return res.status(200).json({ success: true, colors: error, message: 'Настройки получены!' })
+                    } else {
+                        connection.release();
+                        return res.status(500).json({ success: false, colors: error });
+                    }
+                });
             }
-        });
+        }
+        );
     });
 }
 
-const setColor = (app, connection) => {
+const setColor = (app, pool, connection) => {
     app.post('/updateColor', async (req, res) => {
 
         const color = req.body.color;
         const section = req.body.section;
         const query = `UPDATE settings SET ${section} = ?`;
-
-        connection.query(query, color, (results, error) => {
-            if (error) {
-                return res.status(200).json({ success: true, message: 'Фон был успешно сохранен!' })
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
+            } else {
+                connection.query(query, color, (results, error) => {
+                    if (error) {
+                        connection.release();
+                        return res.status(200).json({ success: true, message: 'Фон был успешно сохранен!' })
+                    }
+                    else {
+                        console.error(error);
+                        connection.release();
+                        return res.status(500).json({ success: false, error: error, message: 'Произошла ошибка при обновление фона!' });
+                    }
+                });
             }
-            else {
-                console.error(error);
-                return res.status(500).json({ success: false, error: error, message: 'Произошла ошибка при обновление фона!' });
-            }
-        });
+        }
+        );
     });
 };
 
-const getAllProducts = (app, connection) => {
+const getAllProducts = (app, pool, connection) => {
     app.get('/get_all_products', (req, res) => {
         const sql = `
             SELECT id, title, price, img, 'discounts' as table_name, available FROM discounts
@@ -40,30 +59,48 @@ const getAllProducts = (app, connection) => {
             UNION
             SELECT id, title, price, img, 'products' as table_name, available FROM products
         `;
-        connection.query(sql, (error, result) => {
-            if (result) {
-                return res.status(200).json({ success: true, data: result, message: "Товары получены!" });
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
+            } else {
+                connection.query(sql, (error, result) => {
+                    if (result) {
+                        connection.release();
+                        return res.status(200).json({ success: true, data: result, message: "Товары получены!" });
+                    }
+                    else if (error) {
+                        connection.release();
+                        return res.status(500).json({ success: false, data: error });
+                    }
+                });
             }
-            else if (error) {
-                return res.status(500).json({ success: false, data: error });
-            }
-        });
+        }
+        );
     })
 }
 
-const getAllOrders = (app, connection) => {
-    
+const getAllOrders = (app, pool, connection) => {
+
     app.get('/orders', (req, res) => {
-        connection.query('SELECT * FROM cart', (error, result) => {
-            if (result) {
-                return res.status(200).json({ success: true, data: result, message: "Заказы получены получены!" });
+        pool.getConnection((err, connection) => {
+            if (err) {
+                res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
+            } else {
+                connection.query('SELECT * FROM cart', (error, result) => {
+                    if (result) {
+                        connection.release();
+                        return res.status(200).json({ success: true, data: result, message: "Заказы получены получены!" });
+                    }
+                    else if (error) {
+                        connection.release();
+                        return res.status(500).json({ success: true, data: error });
+                    }
+                });
             }
-            else if (error) {
-                return res.status(500).json({ success: true, data: error });
-            }
-        });
+        }
+        );
     });
-    // connection.end();
+    // connection.release();
 }
 
 
@@ -72,4 +109,4 @@ module.exports = {
     getColor,
     getAllProducts,
     getAllOrders
-}; 
+};  
