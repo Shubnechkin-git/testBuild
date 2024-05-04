@@ -23,18 +23,23 @@ const url = 'https://testbuild-27ld.onrender.com/';
 
 // Интервал пингования в миллисекундах (например, 1 минут)
 // const pingInterval = 13 * 60 * 1000;
-const pingInterval = 1 * 60 * 1000;
+const pingInterval = 10 * 1000;
 
 // Функция для пингования сервера
 function pingServer() {
   axios.get(url)
     .then(() => {
-      console.log(`Pinged server at ${new Date().toLocaleString()}`);
+      const now = new Date();
+      const offset = now.getTimezoneOffset() / 60; // Получаем смещение часового пояса в часах
+      const gmtPlusFour = now.getTime() + (offset + 4) * 60 * 60 * 1000; // Добавляем смещение часового пояса к времени
+      const pingTime = new Date(gmtPlusFour).toLocaleString(); // Преобразуем время в локальную строку даты и времени
+      console.log(`Pinged server at ${pingTime}`);
     })
     .catch((err) => {
       console.error(`Error pinging server: ${err.message}`);
     });
 }
+
 
 // Пингуем сервер каждые pingInterval миллисекунд
 setInterval(pingServer, pingInterval);
