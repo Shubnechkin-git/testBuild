@@ -22,8 +22,8 @@ var cors = require('cors')
 const url = 'https://testbuild-27ld.onrender.com/';
 
 // Интервал пингования в миллисекундах (например, 1 минут)
-// const pingInterval = 13 * 60 * 1000;
-const pingInterval = 10 * 1000;
+const pingInterval = 13 * 60 * 1000;
+// const pingInterval = 10 * 1000;
 
 // Функция для пингования сервера
 function pingServer() {
