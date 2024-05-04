@@ -17,6 +17,26 @@ const { getCatalogItem } = require('./catalog');
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
 var cors = require('cors')
 
+// URL вашего сервера
+const url = 'https://testbuild-27ld.onrender.com/';
+
+// Интервал пингования в миллисекундах (например, 1 минут)
+const pingInterval = 15 * 60 * 1000;
+
+// Функция для пингования сервера
+function pingServer() {
+  axios.get(url)
+    .then(() => {
+      console.log(`Pinged server at ${new Date().toLocaleString()}`);
+    })
+    .catch((err) => {
+      console.error(`Error pinging server: ${err.message}`);
+    });
+}
+
+// Пингуем сервер каждые pingInterval миллисекунд
+setInterval(pingServer, pingInterval);
+
 if (process.env.NODE_ENV === 'development') {
   const corsOptions = {
     origin: 'http://localhost:3000', // Укажите ваш домен React-приложения
