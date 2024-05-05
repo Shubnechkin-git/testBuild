@@ -17,7 +17,6 @@ const sendMail = (app, pool, connection) => {
     });
 
     app.post('/send_email', (req, res) => {
-        console.log(req.body);
         if (req.body.type === 'contact')
             transporter.sendMail({
                 from: '"GenaBooker_Store" <discursiveee@mail.ru>', // sender address
@@ -91,76 +90,132 @@ const sendMail = (app, pool, connection) => {
                 }
             });
         else if (req.body.type === 'order') {
+            let items = '';
+            let totalPrice = 0;
+            console.log(req.body.cartItems);
+            req.body.cartItems.forEach((item, index) => {
+                items += `
+                <tr>
+                <th><img src="data:image/jpeg;base64,${item.product_name.img}" alt="Фото товара"</th>
+                <th><p><strong>${item.product_name}</strong></p></th>
+                <th><p><strong>${item.count} шт.</strong></p></th>
+                <th><p><strong>${item.total_price}</strong></p></th>
+                </tr>
+                `;
+                totalPrice += item.total_price;
+            });
+            // console.log(items);
             transporter.sendMail({
                 from: '"GenaBooker_Store" <discursiveee@mail.ru>', // sender address
                 to: req.body.email, // list of receivers
-                subject: `Ваш заказ №X в GenaBooker_Store находится в обработке, ${req.body.firstname}!`, // Subject line orderNumber
-                text: `Добрый день, ${req.body.firstname},\n\nВаш заказ №X в GenaBooker_Store находится в обработке. Мы ценим ваше время и обязательно уделим внимание вашему заказу.\n\nЗаказ:\n\n${req.body.order}\n\nДанные для доставки:\n\nФамилия: ${req.body.lastname}\nИмя: ${req.body.firstname}\nОтчество: ${req.body.patrynomic}\nEmail: ${req.body.email}\nТелефон: ${req.body.tel}\nАдрес: ${req.body.address}\n\nМы свяжемся с вами в ближайшее время по номеру телефона ${req.body.tel}, чтобы подтвердить ваш заказ.\n\nС уважением,\nКоманда GenaBooker_Store`, // plain text body orderNumber
+                subject: `Ваш заказ в GenaBooker_Store находится в обработке, ${req.body.firstname} !`, // Subject line orderNumber
+                text: `Добрый день, ${req.body.firstname}, \n\nВаш заказ в GenaBooker_Store находится в обработке.Мы ценим ваше время и обязательно уделим внимание вашему заказу.\n\nЗаказ: \n\n${req.body.cartItems} \n\nДанные для доставки: \n\nФамилия: ${req.body.lastname} \nИмя: ${req.body.firstname} \nОтчество: ${req.body.patrynomic} \nEmail: ${req.body.email} \nТелефон: ${req.body.tel} \nАдрес: ${req.body.address} \n\nМы свяжемся с вами в ближайшее время по номеру телефона ${req.body.tel}, чтобы подтвердить ваш заказ.\n\nС уважением, \nКоманда GenaBooker_Store`, // plain text body orderNumber
                 html: `
-                      <!DOCTYPE html>
-                      <html>
-                      <head>
-                          <style>
-                              body {
-                                  font-family: Arial, sans-serif;
-                                  margin: 0;
-                                  padding: 0;
-                              }
-                              .container {
-                                  width: 80%;
-                                  margin: auto;
-                                  background-color: #f8f9fa;
-                                  border-radius: 5px;
-                                  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                              }
-                              .header {
-                                  text-align: center;
-                                  padding: 20px;
-                                  background-color: #343a40;
-                                  color: #fff;
-                                  border-top-left-radius: 5px;
-                                  border-top-right-radius: 5px;
-                              }
-                              .main-content {
-                                  padding: 20px;
-                              }
-                              .footer { 
-                                  text-align: center;
-                                  padding: 20px;
-                                  background-color: #343a40;
-                                  color: #fff;
-                                  border-bottom-left-radius: 5px;
-                                  border-bottom-right-radius: 5px;
-                              }
-                          </style>
-                      </head>
-                      <body>
-                          <div class="container">
-                              <div class="header">
-                                  <h1>GenaBooker_Store</h1>
-                              </div>
-                              <div class="main-content">
-                                  <p>Добрый день, ${req.body.firstname}!</p>
-                                  <p>Ваш заказ №X в GenaBooker_Store находится в обработке. Мы ценим ваше время и обязательно уделим внимание вашему заказу.</p> //orderNumber
-                                  <p>Заказ:</p>
-                                  <p><strong>xxxxxxxxxxx</strong></p>//req.body.order
-                                  <p>Данные для доставки:</p>
-                                  <p><strong>Фамилия:</strong> ${req.body.lastname}</p>
-                                  <p><strong>Имя:</strong> ${req.body.firstname}</p>
-                                  <p><strong>Отчество:</strong> ${req.body.patrynomic}</p>
-                                  <p><strong>Email:</strong> ${req.body.email}</p>
-                                  <p><strong>Телефон:</strong> ${req.body.tel}</p>
-                                  <p><strong>Адрес:</strong> ${req.body.address}</p>
-                                  <p>Мы свяжемся с вами в ближайшее время по номеру телефона ${req.body.tel}, чтобы подтвердить ваш заказ.</p>
-                              </div>
-                              <div class="footer">
-                                  <p>С уважением,</p>
-                                  <p>Команда GenaBooker_Store</p>
-                              </div>
-                          </div>
-                      </body>
-                      </html>
-              ` // html body
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <style>
+                      body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                      }
+                
+                      .container {
+                        width: 100%;
+                        margin: auto;
+                        background-color: #f8f9fa;
+                        border-radius: 5px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                      }
+                
+                      .header {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: #343a40;
+                        color: #fff;
+                        border-top-left-radius: 5px;
+                        border-top-right-radius: 5px;
+                      }
+                
+                      .main-content {
+                        padding: 20px;
+                      }
+                
+                      .footer {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: #343a40;
+                        color: #fff;
+                        border-bottom-left-radius: 5px;
+                        border-bottom-right-radius: 5px;
+                      }
+                
+                      table {
+                        width: 100%;
+                        border-collapse: collapse;
+                      }
+                
+                      th,
+                      td {
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 1px solid #ddd;
+                      }
+                
+                      th {
+                        background-color: #f2f2f2;
+                        font-weight: bold;
+                      }
+                
+                      tr:hover {
+                        background-color: #f5f5f5;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="container">
+                      <div class="header">
+                        <h1>GenaBooker_Store</h1>
+                      </div>
+                      <div class="main-content">
+                        <p>Добрый день, ${req.body.firstname}!</p>
+                        <p>Ваш заказ в GenaBooker_Store находится в обработке. Мы ценим ваше время и обязательно уделим внимание вашему заказу.</p>
+                        <hr>
+                        <p>Заказ:</p>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Фото товара</th>
+                              <th>Название</th>
+                              <th>Количество</th>
+                              <th>Цена</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${items}
+                          </tbody>
+                        </table>
+                        <p><strong>Текущий статус: </strong>В обработке.</p>
+                        <p><strong>Итоговая цена: </strong>${totalPrice} руб.</p>
+                        <hr>
+                        <p>Данные для доставки:</p>
+                        <p><strong>Фамилия:</strong> ${req.body.lastname}</p>
+                        <p><strong>Имя:</strong> ${req.body.firstname}</p>
+                        <p><strong>Отчество:</strong> ${req.body.patrynomic}</p>
+                        <p><strong>Email:</strong> ${req.body.email}</p>
+                        <p><strong>Телефон:</strong> ${req.body.tel}</p>
+                        <p><strong>Адрес:</strong> ${req.body.address}</p>
+                        <p>Мы свяжемся с вами в ближайшее время по номеру телефона ${req.body.tel}, чтобы подтвердить ваш заказ.</p>
+                      </div>
+                      <div class="footer">
+                        <p>С уважением,</p>
+                        <p>Команда GenaBooker_Store</p>
+                      </div>
+                    </div>
+                  </body>
+                </html>
+                ` // html body
             }, (error, info) => {
                 // if (error) {
                 // }
@@ -318,7 +373,7 @@ const getProduct = (productId, categoryName, tableName, pool, connection) => {
             }
         }
 
-        const query = `SELECT * FROM ${productInfo.table_name} WHERE id = ?`;
+        const query = `SELECT * FROM ${productInfo.table_name} WHERE id = ? `;
         pool.getConnection((err, connection) => {
             if (err) {
                 res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
@@ -353,10 +408,10 @@ const addToCart = (app, pool, connection) => {
 
     // SQL-запрос для добавления товара в корзину
     const addToCartQuery = `
-        INSERT INTO cart (user_id, product_id, product_name, category, count, price, total_price, table_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO cart(user_id, product_id, product_name, category, count, price, total_price, table_name)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE count = count + VALUES(count), total_price = count * price
-    `;
+                    `;
 
     app.post('/cart', async (req, res) => {
         // Получение данных о товаре из тела запроса
@@ -409,7 +464,7 @@ const addToCart = (app, pool, connection) => {
 const deleteFromCart = (app, pool, connection) => {
     app.post('/deleteCart', async (req, res) => {
         const id = req.body.id;
-        const query = `DELETE FROM cart WHERE id=?`;
+        const query = `DELETE FROM cart WHERE id =? `;
         pool.getConnection((err, connection) => {
             if (err) {
                 res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
@@ -437,7 +492,7 @@ const getUserCart = (app, pool, connection) => {
         const userId = req.body.sessionInfo.userInfo.id;
         if (req.body.cartProductId == null) {
 
-            const query = `SELECT * FROM cart WHERE user_id = ?`;
+            const query = `SELECT * FROM cart WHERE user_id = ? `;
             pool.getConnection((err, connection) => {
                 if (err) {
                     res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
@@ -471,7 +526,7 @@ const getUserCart = (app, pool, connection) => {
             );
         }
         else {
-            const query = `SELECT * FROM cart WHERE id = ?`;
+            const query = `SELECT * FROM cart WHERE id = ? `;
 
             pool.getConnection((err, connection) => {
                 if (err) {
