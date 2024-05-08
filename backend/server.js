@@ -12,7 +12,7 @@ const login = require('./login');
 const register = require('./register');
 const { getHotItems, getNoveltyItems, getDiscountItems, getProduct } = require('./items');
 const { deleteFromCart, getUserCart, getAnyRoute, getExpressBackendRoute, checkUser, getUserInfo, checkSession, logutUser, addToCart, sendMail } = require('./routes');
-const { setColor, getColor, getAllProducts, getAllOrders } = require('./admin');
+const { setColor, getColor, getAllProducts, getAllOrders, addProduct, changeStatus } = require('./admin');
 const { getCatalogItem } = require('./catalog');
 // Сообщение о том, что сервер запущен и прослушивает указанный порт 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}`)); //Строка 6
@@ -101,7 +101,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // AWy6bmydAyybAzzbdc8V email pass
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '100mb' }));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
@@ -165,6 +165,10 @@ getColor(app, pool, connection); //ответ на /getColor - вывод нас
 getAllProducts(app, pool, connection); //ответ на /get_all_products - вывод товаров в адмиеку 
 
 getAllOrders(app, pool, connection); //ответ на /orders - вывод товаров в адмиеку 
+
+addProduct(app, pool, connection); //ответ на /add_product - добавление нового товара
+
+changeStatus(app, pool, connection); //ответ на /change_ыtatus - смена статуса заказа
 
 sendMail(app, pool, connection); //ответ на /send_email - отправка письма на почту
 

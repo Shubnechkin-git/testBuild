@@ -92,14 +92,12 @@ const sendMail = (app, pool, connection) => {
         else if (req.body.type === 'order') {
             let items = '';
             let totalPrice = 0;
-            console.log(req.body.cartItems);
             req.body.cartItems.forEach((item, index) => {
                 items += `
                 <tr>
-                <th><img src="data:image/jpeg;base64,${item.product_name.img}" alt="Фото товара"</th>
-                <th><p><strong>${item.product_name}</strong></p></th>
-                <th><p><strong>${item.count} шт.</strong></p></th>
-                <th><p><strong>${item.total_price}</strong></p></th>
+                <td><p><strong>${item.product_name}</strong></p></td>
+                <td><p><strong>${item.count} шт.</strong></p></td>
+                <td><p><strong>${item.total_price}</strong></p></td>
                 </tr>
                 `;
                 totalPrice += item.total_price;
@@ -186,7 +184,6 @@ const sendMail = (app, pool, connection) => {
                         <table>
                           <thead>
                             <tr>
-                              <th>Фото товара</th>
                               <th>Название</th>
                               <th>Количество</th>
                               <th>Цена</th>
@@ -219,12 +216,213 @@ const sendMail = (app, pool, connection) => {
             }, (error, info) => {
                 // if (error) {
                 // }
-                if (info) return res.status(200).json({ success: true, data: info, message: 'Сообщение доставленно!' });
+                if (info) return res.status(200).json({ success: true, data: info, message: 'Заказ создан!' });
                 else {
                     return res.status(500).json({ success: false, message: "Ошибка повторите позже!" });
                 }
             });
-        } else { res.status(500).json({ success: false, message: 'Ошибка повторите позже!' }) }
+        }
+        else if (req.body.type === 'completed') {
+            console.log(req.body);
+            transporter.sendMail({
+                from: '"GenaBooker_Store" <discursiveee@mail.ru>', // sender address
+                to: req.body.email, // list of receivers
+                subject: `Ваш заказ в GenaBooker_Store подтвержден!`, // Subject line orderNumber
+                text: `Добрый день\n\nМы рады сообщить, что ваш заказ в GenaBooker_Store подтвержден.`,
+                html: `
+                  <!DOCTYPE html>
+                  <html>
+                    <head>
+                      <style>
+                        body {
+                          font-family: Arial, sans-serif;
+                          margin: 0;
+                          padding: 0;
+                        }
+              
+                        .container {
+                          width: 100%;
+                          margin: auto;
+                          background-color: #f8f9fa;
+                          border-radius: 5px;
+                          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        }
+              
+                        .header {
+                          text-align: center;
+                          padding: 20px;
+                          background-color: #343a40;
+                          color: #fff;
+                          border-top-left-radius: 5px;
+                          border-top-right-radius: 5px;
+                        }
+              
+                        .main-content {
+                          padding: 20px;
+                        }
+              
+                        .footer {
+                          text-align: center;
+                          padding: 20px;
+                          background-color: #343a40;
+                          color: #fff;
+                          border-bottom-left-radius: 5px;
+                          border-bottom-right-radius: 5px;
+                        }
+              
+                        table {
+                          width: 100%;
+                          border-collapse: collapse;
+                        }
+              
+                        th,
+                        td {
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 1px solid #ddd;
+                        }
+              
+                        th {
+                          background-color: #f2f2f2;
+                          font-weight: bold;
+                        }
+              
+                        tr:hover {
+                          background-color: #f5f5f5;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      <div class="container">
+                        <div class="header">
+                          <h1>GenaBooker_Store</h1>
+                        </div>
+                        <div class="main-content">
+                          <p>Добрый день!</p>
+                          <p>Мы рады сообщить, что ваш заказ в GenaBooker_Store подтвержден.</p>
+                          <hr>
+                          <p><strong>Текущий статус: </strong>Подтвержден.</p>
+                          <hr>
+                        </div>
+                        <div class="footer">
+                          <p>Спасибо за покупку в GenaBooker_Store!</p>
+                          <p>С уважением,</p>
+                          <p>Команда GenaBooker_Store</p>
+                        </div>
+                      </div>
+                    </body>
+                  </html>
+                ` // html body
+            }, (error, info) => {
+                // if (error) {
+                // }
+                if (info) return res.status(200).json({ success: true, data: info, message: 'Заказ подтвержден!' });
+                else {
+                    return res.status(500).json({ success: false, message: "Ошибка повторите позже!" });
+                }
+            });
+        }
+        else if (req.body.type === 'rejected') {
+            console.log(req.body);
+            transporter.sendMail({
+                from: '"GenaBooker_Store" <discursiveee@mail.ru>', // sender address
+                to: req.body.email, // list of receivers
+                subject: `Ваш заказ в GenaBooker_Store отклонен!`, // Subject line orderNumber
+                text: `Добрый день\n\nК сожалению, ваш заказ в GenaBooker_Store отклонен.`,
+                html: `
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <style>
+                      body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                      }
+          
+                      .container {
+                        width: 100%;
+                        margin: auto;
+                        background-color: #f8f9fa;
+                        border-radius: 5px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                      }
+          
+                      .header {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: #343a40;
+                        color: #fff;
+                        border-top-left-radius: 5px;
+                        border-top-right-radius: 5px;
+                      }
+          
+                      .main-content {
+                        padding: 20px;
+                      }
+          
+                      .footer {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: #343a40;
+                        color: #fff;
+                        border-bottom-left-radius: 5px;
+                        border-bottom-right-radius: 5px;
+                      }
+          
+                      table {
+                        width: 100%;
+                        border-collapse: collapse;
+                      }
+          
+                      th,
+                      td {
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 1px solid #ddd;
+                      }
+          
+                      th {
+                        background-color: #f2f2f2;
+                        font-weight: bold;
+                      }
+          
+                      tr:hover {
+                        background-color: #f5f5f5;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="container">
+                      <div class="header">
+                        <h1>GenaBooker_Store</h1>
+                      </div>
+                      <div class="main-content">
+                        <p>Добрый день!</p>
+                        <p>К сожалению, ваш заказ в GenaBooker_Store отклонен.</p>
+                        <hr>
+                        <p><strong>Текущий статус: </strong>Отклонен.</p>
+                        <hr>
+                      </div>
+                      <div class="footer">
+                        <p>Спасибо за покупку в GenaBooker_Store!</p>
+                        <p>С уважением,</p>
+                        <p>Команда GenaBooker_Store</p>
+                      </div>
+                    </div>
+                  </body>
+                </html>
+              ` // html body
+            }, (error, info) => {
+                // if (error) {
+                // }
+                if (info) return res.status(200).json({ success: true, data: info, message: 'Заказ отклонен!' });
+                else {
+                    return res.status(500).json({ success: false, message: "Ошибка повторите позже!" });
+                }
+            });
+        }
+        else { res.status(500).json({ success: false, message: 'Ошибка повторите позже!' }) }
     });
 }
 
@@ -408,10 +606,12 @@ const addToCart = (app, pool, connection) => {
 
     // SQL-запрос для добавления товара в корзину
     const addToCartQuery = `
-        INSERT INTO cart(user_id, product_id, product_name, category, count, price, total_price, table_name)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE count = count + VALUES(count), total_price = count * price
-                    `;
+    INSERT INTO cart(user_id, product_id, product_name, category, count, price, total_price, table_name, status)
+    VALUES(?, ?, ?, ?, ?, ?, ?, ?, 'waiting')
+    ON DUPLICATE KEY UPDATE
+      count = IF(status = 'waiting', count + VALUES(count), 1),
+      total_price = IF(status = 'waiting', count * price, price * VALUES(count)),
+      status = 'waiting';`;
 
     app.post('/cart', async (req, res) => {
         // Получение данных о товаре из тела запроса
@@ -492,7 +692,7 @@ const getUserCart = (app, pool, connection) => {
         const userId = req.body.sessionInfo.userInfo.id;
         if (req.body.cartProductId == null) {
 
-            const query = `SELECT * FROM cart WHERE user_id = ? `;
+            const query = `SELECT * FROM cart WHERE user_id = ? AND status LIKE 'waiting' `;
             pool.getConnection((err, connection) => {
                 if (err) {
                     res.status(500).json({ success: false, error: 'Ошибка при подключение к бд' });
